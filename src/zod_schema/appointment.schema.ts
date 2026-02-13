@@ -40,5 +40,5 @@ export const AppointmentReschedule = z.object({
 }) 
 
 export const UpdateStatus = z.object({
-    status : z.enum(['CONFIRMED' , 'CANCELLED' , 'COMPLETED'])
+    status : z.enum(['CONFIRMED' , 'CANCELLED' , 'COMPLETED' , 'PENDING' , 'NO-SHOW'])
 })

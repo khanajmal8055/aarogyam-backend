@@ -16,8 +16,10 @@ app.use(express.urlencoded({extended:true , limit:"16kb"}))
 app.use(cookieParser())
 
 import userRouter from "./routes/user.routes"
+import appointmentRouter from './routes/appointment.routes'
 
 app.use('/api/v1' , userRouter)
+app.use('api/v1' , appointmentRouter)
 
 
 export {app}

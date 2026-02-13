@@ -7,9 +7,7 @@ import { AuthRequest } from "../types/auth-request";
 import mongoose, { isValidObjectId } from "mongoose";
 import { Doctor } from "../models/doctor.model";
 import { Appointment } from "../models/appointment.model";
-import { unknown } from "zod";
-import { objectId } from "../utils/objectIdConverter";
-import { app } from "../app";
+
 
 // Public User Controllers
 const bookAppointment = asyncHandler(async(req:AuthRequest,res:Response)=>{
@@ -324,14 +322,14 @@ const getAllAppointments = asyncHandler(async(req:AuthRequest,res:Response)=>{
     )
 })
 
-const updateStatus = asyncHandler(async(req:AuthRequest,res:Response)=>{
+const updateAppointmentStatus = asyncHandler(async(req:AuthRequest,res:Response)=>{
     
     if(req.user?.role !== 'admin'){
         throw new ApiError(403 , "Admin access only")
     }
     const { appointmentId } = req.params;
 
-    const {status} = req.body;
+    const {status} = UpdateStatus.parse(req.body);
 
 
     if(!isValidObjectId(appointmentId)){
@@ -371,3 +369,5 @@ const updateStatus = asyncHandler(async(req:AuthRequest,res:Response)=>{
     
 })
 
+
+export {bookAppointment , getAppointment , getAllAppointments , updateAppointmentStatus , updateAppointment , cancelAppointment , rescheduleAppointment}
