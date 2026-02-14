@@ -9,7 +9,7 @@ const router = Router()
 router.route('/user/appointment/book-appointment').post(verifyJwt, bookAppointment)
 router.route('/user/appointment/view-appointment').get(verifyJwt , getAppointment)
 router.route('/user/appointment/update-appointment:appointmentId').patch(verifyJwt , updateAppointment)
-router.route('/user/appointment/reshedule-appointment').patch(verifyJwt,rescheduleAppointment)
+router.route('/user/appointment/reschedule-appointment').patch(verifyJwt,rescheduleAppointment)
 router.route('/user/appointment/cancel-appointment').delete(verifyJwt , cancelAppointment)
 
 
