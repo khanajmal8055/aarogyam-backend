@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 
 export interface UDoctor extends Document{
     doctorName:string
@@ -21,5 +21,6 @@ export interface UDoctor extends Document{
     }[]
     isActive:boolean
     createdAt:Date
-    updatedAt:Date
+    updatedAt:Date,
+    department:Types.ObjectId
 }

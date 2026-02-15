@@ -1,4 +1,4 @@
-import { model, Schema } from "mongoose";
+import mongoose, { model, Schema } from "mongoose";
 import { UDoctor } from "../types/doctor.types";
 import { required } from "zod/mini";
 
@@ -14,6 +14,10 @@ const doctorSchema = new Schema<UDoctor>(
         profileImage:{
             type:String,
             required:true
+        },
+        department:{
+            type:mongoose.Schema.Types.ObjectId,
+            ref:'Department'
         },
         doctorName:{
             type:String,
