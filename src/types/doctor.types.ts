@@ -17,8 +17,8 @@ export interface UDoctor extends Document{
     }
     availability:{
         day:string
-        slots:string[]
-    }[]
+        slots:string
+    }
     isActive:boolean
     createdAt:Date
     updatedAt:Date,
