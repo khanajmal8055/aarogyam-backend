@@ -91,7 +91,12 @@ const updateDoctorFeesCharge = (0, asyncHandler_1.default)(async (req, res) => {
         throw new apiError_1.ApiError(400, "Invalid Doctor Id");
     }
     const data = doctor_schema_1.DoctorFeeCharge.parse(req.body);
-    const doctor = await doctor_model_1.Doctor.findByIdAndUpdate(doctorId, { consultationFee: data.consultationFee }, { new: true, runValidators: true });
+    const doctor = await doctor_model_1.Doctor.findByIdAndUpdate(doctorId, {
+        $set: {
+            consultationFee: data.consultationFee,
+            availability: data.availability
+        }
+    }, { new: true, runValidators: true });
     if (!doctor) {
         throw new apiError_1.ApiError(404, "Doctor not Found or Inactive");
     }
@@ -100,4 +105,48 @@ const updateDoctorFeesCharge = (0, asyncHandler_1.default)(async (req, res) => {
     }
     return res.status(200)
         .json(new apiResponse_1.ApiResponse(200, doctor, "Doctor's Consultation Fee updated Successfully"));
+});
+const updateDoctorDetails = (0, asyncHandler_1.default)(async (req, res) => {
+    if (req.user?.role !== 'admin') {
+        throw new apiError_1.ApiError(403, "Admin Access Only!!!");
+    }
+    const { doctorId } = req.params;
+    if (!(0, mongoose_1.isValidObjectId)(doctorId)) {
+        throw new apiError_1.ApiError(400, "Invalid Doctor Id ");
+    }
+    const data = doctor_schema_1.DoctorDetails.parse(req.body);
+    const doctor = await doctor_model_1.Doctor.findByIdAndUpdate(doctorId, {
+        $set: {
+            doctorName: data.doctorName,
+            email: data.email,
+            phone: data.phone,
+            address: data.address
+        }
+    }, { new: true, runValidators: true });
+    if (!doctor) {
+        throw new apiError_1.ApiError(400, "Doctor not Found");
+    }
+    return res.status(200)
+        .json(new apiResponse_1.ApiResponse(200, doctor, "Doctor Details Updated Successfully"));
+});
+const updateDoctorQualificationAndExperience = (0, asyncHandler_1.default)(async (req, res) => {
+    if (req.user?.role !== 'admin') {
+        throw new apiError_1.ApiError(403, "Admin Access Only!!!");
+    }
+    const { doctorId } = req.params;
+    if (!(0, mongoose_1.isValidObjectId)(doctorId)) {
+        throw new apiError_1.ApiError(400, "Invalid Doctor Id");
+    }
+    const data = doctor_schema_1.UpdateDoctor.parse(req.body);
+    const doctor = await doctor_model_1.Doctor.findByIdAndUpdate(doctorId, {
+        $set: {
+            experience: data.experience,
+            qualification: data.qualification
+        }
+    }, { new: true, runValidators: true });
+    if (!doctor) {
+        throw new apiError_1.ApiError(404, "Doctor not found");
+    }
+    return res.status(200)
+        .json(new apiResponse_1.ApiResponse(200, doctor, "Doctor Updated Successfully"));
 });

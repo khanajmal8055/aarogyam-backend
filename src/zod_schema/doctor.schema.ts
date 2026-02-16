@@ -25,5 +25,25 @@ export const CreateDoctorSchema = z.object({
 })
 
 export const DoctorFeeCharge = z.object({
-    consultationFee:z.number()
+    consultationFee:z.number(),
+    availability:z.object({
+        day:z.string(),
+        slots:z.string()
+    }),
+})
+
+export const DoctorDetails = z.object({
+    doctorName:z.string(),
+    phone:z.string(),
+    email:z.string(),
+    address:z.object({
+        street:z.string(),
+        city:z.string(),
+        state:z.string()
+    })
+})
+
+export const UpdateDoctor = z.object({
+    qualification:z.string(),
+    experience:z.number()
 })

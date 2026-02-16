@@ -3,7 +3,7 @@ import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { AuthRequest } from "../types/auth-request";
 import { Response } from "express";
-import { CreateDoctorSchema, DoctorFeeCharge } from "../zod_schema/doctor.schema";
+import { CreateDoctorSchema, DoctorDetails, DoctorFeeCharge, UpdateDoctor } from "../zod_schema/doctor.schema";
 import { uploadOnCloudinary } from "../utils/cloudinary";
 import { Doctor } from "../models/doctor.model";
 import { Department } from "../models/department.model";
@@ -11,6 +11,7 @@ import { isValidObjectId , Types } from "mongoose";
 import { equal } from "node:assert";
 import { Appointment } from "../models/appointment.model";
 import { objectId } from "../utils/objectIdConverter";
+import { is } from "zod/locales";
 
 
 const createDoctor = asyncHandler(async(req:AuthRequest,res:Response)=>{
@@ -129,7 +130,12 @@ const updateDoctorFeesCharge = asyncHandler(async(req:AuthRequest,res:Response)=
     
     const doctor = await Doctor.findByIdAndUpdate(
          doctorId ,
-        {consultationFee:data.consultationFee},
+        {
+            $set:{
+                consultationFee:data.consultationFee , 
+                availability:data.availability
+            }
+        },
         {new:true , runValidators:true}
     )
 
@@ -145,6 +151,76 @@ const updateDoctorFeesCharge = asyncHandler(async(req:AuthRequest,res:Response)=
    .json(
     new ApiResponse(200 , doctor , "Doctor's Consultation Fee updated Successfully")
    )
+})
+
+const updateDoctorDetails = asyncHandler(async(req:AuthRequest,res:Response)=>{
+    if(req.user?.role !== 'admin'){
+        throw new ApiError(403 , "Admin Access Only!!!")
+    }
+
+    const {doctorId} = req.params
+
+    if(!isValidObjectId(doctorId)){
+        throw new ApiError(400 , "Invalid Doctor Id ")
+    }
+
+    const data = DoctorDetails.parse(req.body);
+
+    const doctor = await Doctor.findByIdAndUpdate(
+        doctorId,
+        {
+            $set:{
+                doctorName:data.doctorName,
+                email:data.email,
+                phone:data.phone,
+                address:data.address
+            }
+        },
+        {new:true , runValidators:true}
+    )
+
+    if(!doctor){
+        throw new ApiError(400 , "Doctor not Found")
+    }
+    return res.status(200)
+    .json(
+        new ApiResponse(200 , doctor , "Doctor Details Updated Successfully")
+    )
+
+})
+
+const updateDoctorQualificationAndExperience = asyncHandler(async(req:AuthRequest,res:Response)=>{
+    if(req.user?.role !== 'admin'){
+        throw new ApiError(403 , "Admin Access Only!!!")
+    }
+
+    const {doctorId} = req.params;
+
+    if(!isValidObjectId(doctorId)){
+        throw new ApiError(400 , "Invalid Doctor Id")
+    }
+
+    const data = UpdateDoctor.parse(req.body);
+
+    const doctor = await Doctor.findByIdAndUpdate(
+        doctorId,
+        {
+            $set:{
+                experience:data.experience,
+                qualification:data.qualification
+            }
+        },
+        {new:true , runValidators:true}
+    );
+
+    if(!doctor){
+        throw new ApiError(404 , "Doctor not found")
+    }
+
+    return res.status(200)
+    .json(
+        new ApiResponse(200 , doctor , "Doctor Updated Successfully")
+    )
 })
 
 

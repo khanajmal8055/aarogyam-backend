@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DoctorFeeCharge = exports.CreateDoctorSchema = void 0;
+exports.UpdateDoctor = exports.DoctorDetails = exports.DoctorFeeCharge = exports.CreateDoctorSchema = void 0;
 const zod_1 = __importDefault(require("zod"));
 exports.CreateDoctorSchema = zod_1.default.object({
     doctorName: zod_1.default.string(),
@@ -27,5 +27,23 @@ exports.CreateDoctorSchema = zod_1.default.object({
     }),
 });
 exports.DoctorFeeCharge = zod_1.default.object({
-    consultationFee: zod_1.default.number()
+    consultationFee: zod_1.default.number(),
+    availability: zod_1.default.object({
+        day: zod_1.default.string(),
+        slots: zod_1.default.string()
+    }),
+});
+exports.DoctorDetails = zod_1.default.object({
+    doctorName: zod_1.default.string(),
+    phone: zod_1.default.string(),
+    email: zod_1.default.string(),
+    address: zod_1.default.object({
+        street: zod_1.default.string(),
+        city: zod_1.default.string(),
+        state: zod_1.default.string()
+    })
+});
+exports.UpdateDoctor = zod_1.default.object({
+    qualification: zod_1.default.string(),
+    experience: zod_1.default.number()
 });
