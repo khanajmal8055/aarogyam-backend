@@ -74,6 +74,9 @@ const removeDoctor = (0, asyncHandler_1.default)(async (req, res) => {
         doctorId: doctor._id,
         status: { $in: ['CONFIRMED'] }
     });
+    if (hasAppointment) {
+        throw new apiError_1.ApiError(400, "Doctor has upcoming appointment and cannot be deactivated!!!");
+    }
     doctor.isActive = false;
     await doctor.save();
     return res.status(200)

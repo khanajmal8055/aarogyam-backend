@@ -100,6 +100,10 @@ const removeDoctor = asyncHandler(async(req:AuthRequest,res:Response)=>{
         status : {$in : ['CONFIRMED']}
     })
 
+    if(hasAppointment){
+        throw new ApiError(400 , "Doctor has upcoming appointment and cannot be deactivated!!!")
+    }
+
     doctor.isActive = false;
     await doctor.save()
 
