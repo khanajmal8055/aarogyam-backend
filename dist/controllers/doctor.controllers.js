@@ -82,16 +82,19 @@ const removeDoctor = (0, asyncHandler_1.default)(async (req, res) => {
     return res.status(200)
         .json(new apiResponse_1.ApiResponse(200, {}, 'Doctor Inactive successfully'));
 });
-// const updateDoctorFeesCharge = asyncHandler(async(req:AuthRequest,res:Response)=>{
-//     if(req.user?.role !== 'admin'){
-//         throw new ApiError(403, "Admin Access Only!!!")
-//     }
-//     const {doctorId} = req.params;
-//     if(!isValidObjectId(doctorId)){
-//         throw new ApiError(400 , "Invalid Doctor Id")
-//     }
-//     const doctor = await Doctor.findById(doctorId)
-//     if(!doctor){
-//         throw new 
-//     }
-// })
+const updateDoctorFeesCharge = (0, asyncHandler_1.default)(async (req, res) => {
+    if (req.user?.role !== 'admin') {
+        throw new apiError_1.ApiError(403, "Admin Access Only!!!");
+    }
+    const { doctorId } = req.params;
+    if (!(0, mongoose_1.isValidObjectId)(doctorId)) {
+        throw new apiError_1.ApiError(400, "Invalid Doctor Id");
+    }
+    const data = doctor_schema_1.DoctorFeeCharge.parse(req.body);
+    const doctor = await doctor_model_1.Doctor.findByIdAndUpdate({ _id: doctorId, isActive: true }, { consultationFee: data.consultationFee }, { new: true, runValidators: true });
+    if (!doctor) {
+        throw new apiError_1.ApiError(404, "Doctor not Found or Inactive");
+    }
+    return res.status(200)
+        .json(new apiResponse_1.ApiResponse(200, doctor, "Doctor's Consultation Fee updated Successfully"));
+});

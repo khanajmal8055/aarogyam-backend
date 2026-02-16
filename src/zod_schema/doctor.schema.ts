@@ -23,3 +23,7 @@ export const CreateDoctorSchema = z.object({
     
 
 })
+
+export const DoctorFeeCharge = z.object({
+    consultationFee:z.number()
+})

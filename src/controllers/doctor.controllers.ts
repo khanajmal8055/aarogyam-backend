@@ -3,7 +3,7 @@ import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { AuthRequest } from "../types/auth-request";
 import { Response } from "express";
-import { CreateDoctorSchema } from "../zod_schema/doctor.schema";
+import { CreateDoctorSchema, DoctorFeeCharge } from "../zod_schema/doctor.schema";
 import { uploadOnCloudinary } from "../utils/cloudinary";
 import { Doctor } from "../models/doctor.model";
 import { Department } from "../models/department.model";
@@ -113,20 +113,32 @@ const removeDoctor = asyncHandler(async(req:AuthRequest,res:Response)=>{
     )
 })
 
-// const updateDoctorFeesCharge = asyncHandler(async(req:AuthRequest,res:Response)=>{
-//     if(req.user?.role !== 'admin'){
-//         throw new ApiError(403, "Admin Access Only!!!")
-//     }
+const updateDoctorFeesCharge = asyncHandler(async(req:AuthRequest,res:Response)=>{
+    if(req.user?.role !== 'admin'){
+        throw new ApiError(403, "Admin Access Only!!!")
+    }
 
-//     const {doctorId} = req.params;
+    const {doctorId} = req.params;
+    
+    if(!isValidObjectId(doctorId)){
+        throw new ApiError(400 , "Invalid Doctor Id")
+    }
 
-//     if(!isValidObjectId(doctorId)){
-//         throw new ApiError(400 , "Invalid Doctor Id")
-//     }
+    const data = DoctorFeeCharge.parse(req.body)
+    
+    const doctor = await Doctor.findByIdAndUpdate(
+        {_id:doctorId , isActive:true},
+        {consultationFee:data.consultationFee},
+        {new:true , runValidators:true}
+    )
 
-//     const doctor = await Doctor.findById(doctorId)
+    if(!doctor){
+        throw new ApiError(404 , "Doctor not Found or Inactive")
+    }
 
-//     if(!doctor){
-//         throw new 
-//     }
-// })
+   return res.status(200)
+   .json(
+    new ApiResponse(200 , doctor , "Doctor's Consultation Fee updated Successfully")
+   )
+})
+
