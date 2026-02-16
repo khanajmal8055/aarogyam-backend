@@ -7,6 +7,9 @@ import { CreateDoctorSchema } from "../zod_schema/doctor.schema";
 import { uploadOnCloudinary } from "../utils/cloudinary";
 import { Doctor } from "../models/doctor.model";
 import { Department } from "../models/department.model";
+import { isValidObjectId } from "mongoose";
+import { equal } from "node:assert";
+import { Appointment } from "../models/appointment.model";
 
 
 const createDoctor = asyncHandler(async(req:AuthRequest,res:Response)=>{
@@ -70,11 +73,56 @@ const createDoctor = asyncHandler(async(req:AuthRequest,res:Response)=>{
 
 })
 
-// const deleteDoctor = asyncHandler(async(req:AuthRequest,res:Response)=>{
+const removeDoctor = asyncHandler(async(req:AuthRequest,res:Response)=>{
     
+    if(req.user?.role !== 'admin'){
+        throw new ApiError(403 , "Admin Access Only!!!")
+    }
+
+    const {doctorId} = req.params;
+
+    if(!isValidObjectId(doctorId)){
+        throw new ApiError(400 , "Invalid Doctor Id")
+    }
+
+    const doctor = await Doctor.findById(doctorId)
+
+    if(!doctor){
+        throw new ApiError(404, "Doctor not Found")
+    }
+
+    if(!doctor.isActive){
+        throw new ApiError(409 , "Dcotor is already inactive") 
+    }
+
+    const hasAppointment = await Appointment.exists({
+        doctorId:doctor._id,
+        status : {$in : ['CONFIRMED']}
+    })
+
+    doctor.isActive = false;
+    await doctor.save()
+
+    return res.status(200)
+    .json(
+        new ApiResponse(200 , {} , 'Doctor Inactive successfully')
+    )
+})
+
+// const updateDoctorFeesCharge = asyncHandler(async(req:AuthRequest,res:Response)=>{
 //     if(req.user?.role !== 'admin'){
-//         throw new ApiError(403 , "Admin Access Only!!!")
+//         throw new ApiError(403, "Admin Access Only!!!")
 //     }
 
-//     const {doctorId} = req.par
+//     const {doctorId} = req.params;
+
+//     if(!isValidObjectId(doctorId)){
+//         throw new ApiError(400 , "Invalid Doctor Id")
+//     }
+
+//     const doctor = await Doctor.findById(doctorId)
+
+//     if(!doctor){
+//         throw new 
+//     }
 // })

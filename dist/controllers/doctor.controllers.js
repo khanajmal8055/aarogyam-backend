@@ -10,6 +10,8 @@ const doctor_schema_1 = require("../zod_schema/doctor.schema");
 const cloudinary_1 = require("../utils/cloudinary");
 const doctor_model_1 = require("../models/doctor.model");
 const department_model_1 = require("../models/department.model");
+const mongoose_1 = require("mongoose");
+const appointment_model_1 = require("../models/appointment.model");
 const createDoctor = (0, asyncHandler_1.default)(async (req, res) => {
     if (req.user?.role !== 'admin') {
         throw new apiError_1.ApiError(403, "Admin Access Only!!!");
@@ -53,9 +55,40 @@ const createDoctor = (0, asyncHandler_1.default)(async (req, res) => {
     return res.status(201)
         .json(new apiResponse_1.ApiResponse(201, doctor, "Doctor created Successfully"));
 });
-// const deleteDoctor = asyncHandler(async(req:AuthRequest,res:Response)=>{
+const removeDoctor = (0, asyncHandler_1.default)(async (req, res) => {
+    if (req.user?.role !== 'admin') {
+        throw new apiError_1.ApiError(403, "Admin Access Only!!!");
+    }
+    const { doctorId } = req.params;
+    if (!(0, mongoose_1.isValidObjectId)(doctorId)) {
+        throw new apiError_1.ApiError(400, "Invalid Doctor Id");
+    }
+    const doctor = await doctor_model_1.Doctor.findById(doctorId);
+    if (!doctor) {
+        throw new apiError_1.ApiError(404, "Doctor not Found");
+    }
+    if (!doctor.isActive) {
+        throw new apiError_1.ApiError(409, "Dcotor is already inactive");
+    }
+    const hasAppointment = await appointment_model_1.Appointment.exists({
+        doctorId: doctor._id,
+        status: { $in: ['CONFIRMED'] }
+    });
+    doctor.isActive = false;
+    await doctor.save();
+    return res.status(200)
+        .json(new apiResponse_1.ApiResponse(200, {}, 'Doctor Inactive successfully'));
+});
+// const updateDoctorFeesCharge = asyncHandler(async(req:AuthRequest,res:Response)=>{
 //     if(req.user?.role !== 'admin'){
-//         throw new ApiError(403 , "Admin Access Only!!!")
+//         throw new ApiError(403, "Admin Access Only!!!")
 //     }
-//     const {doctorId} = req.par
+//     const {doctorId} = req.params;
+//     if(!isValidObjectId(doctorId)){
+//         throw new ApiError(400 , "Invalid Doctor Id")
+//     }
+//     const doctor = await Doctor.findById(doctorId)
+//     if(!doctor){
+//         throw new 
+//     }
 // })
