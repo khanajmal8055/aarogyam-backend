@@ -12,6 +12,7 @@ const doctor_model_1 = require("../models/doctor.model");
 const department_model_1 = require("../models/department.model");
 const mongoose_1 = require("mongoose");
 const appointment_model_1 = require("../models/appointment.model");
+;
 const createDoctor = (0, asyncHandler_1.default)(async (req, res) => {
     if (req.user?.role !== 'admin') {
         throw new apiError_1.ApiError(403, "Admin Access Only!!!");
@@ -149,4 +150,41 @@ const updateDoctorQualificationAndExperience = (0, asyncHandler_1.default)(async
     }
     return res.status(200)
         .json(new apiResponse_1.ApiResponse(200, doctor, "Doctor Updated Successfully"));
+});
+const getSingleDoctorDetail = (0, asyncHandler_1.default)(async (req, res) => {
+    const { doctorId } = req.params;
+    if (!(0, mongoose_1.isValidObjectId)(doctorId)) {
+        throw new apiError_1.ApiError(400, "Invalid Doctor Id");
+    }
+    const doctor = await doctor_model_1.Doctor.findById(doctorId);
+    if (!doctor) {
+        throw new apiError_1.ApiError(404, "Doctor not found!!!");
+    }
+    return res.status(200)
+        .json(new apiResponse_1.ApiResponse(200, doctor, "Doctor fetched successfully"));
+});
+const getAllDoctors = (0, asyncHandler_1.default)(async (req, res) => {
+    const page = Number(req.query) || 1;
+    const limit = Number(req.query) || 10;
+    const skip = (page - 1) * limit;
+    const search = req.query.search?.toString() || "";
+    const filter = search ? { doctorName: { $regex: search, $options: "i" } } : {};
+    const [doctors, total] = await Promise.all([
+        doctor_model_1.Doctor.find(filter)
+            .skip(skip)
+            .limit(limit)
+            .sort({ doctorName: 1 }),
+        doctor_model_1.Doctor.countDocuments(filter)
+    ]);
+    const data = {
+        doctors,
+        pagination: {
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit)
+        }
+    };
+    return res.status(200)
+        .json(new apiResponse_1.ApiResponse(200, data, "All Doctors list fetched successfully"));
 });

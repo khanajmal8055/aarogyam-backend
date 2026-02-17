@@ -26,4 +26,4 @@ const departmentSchema = new Schema<UDepartment>(
     }
 )
 
-export const Department = model('Department' , departmentSchema)
+export const Department = model<UDepartment>('Department' , departmentSchema)

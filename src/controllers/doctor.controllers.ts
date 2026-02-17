@@ -8,10 +8,8 @@ import { uploadOnCloudinary } from "../utils/cloudinary";
 import { Doctor } from "../models/doctor.model";
 import { Department } from "../models/department.model";
 import { isValidObjectId , Types } from "mongoose";
-import { equal } from "node:assert";
 import { Appointment } from "../models/appointment.model";
-import { objectId } from "../utils/objectIdConverter";
-import { is } from "zod/locales";
+;
 
 
 const createDoctor = asyncHandler(async(req:AuthRequest,res:Response)=>{
@@ -221,6 +219,63 @@ const updateDoctorQualificationAndExperience = asyncHandler(async(req:AuthReques
     .json(
         new ApiResponse(200 , doctor , "Doctor Updated Successfully")
     )
+})
+
+const getSingleDoctorDetail = asyncHandler(async(req:AuthRequest,res:Response)=>{
+    const {doctorId} = req.params;
+
+    if(!isValidObjectId(doctorId)){
+        throw new ApiError(400 , "Invalid Doctor Id")
+    }
+
+    const doctor = await Doctor.findById(doctorId);
+
+    if(!doctor){
+        throw new ApiError(404, "Doctor not found!!!")
+    }
+
+    return res.status(200)
+    .json(
+        new ApiResponse(200 , doctor , "Doctor fetched successfully")
+    )
+})
+
+const getAllDoctors = asyncHandler(async(req:AuthRequest,res:Response)=>{
+    const page = Number(req.query) || 1;
+    const limit = Number(req.query) || 10;
+    const skip = (page - 1) * limit;
+    
+    const search = req.query.search?.toString() || "";
+
+    const filter = search ? {doctorName : {$regex : search , $options: "i"}} : {};
+
+    const [doctors , total] = await Promise.all([
+        Doctor.find(filter)
+        .skip(skip)
+        .limit(limit)
+        .sort({doctorName:1}),
+
+        Doctor.countDocuments(filter)
+    ])
+
+    const data = {
+        doctors,
+        pagination:{
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total/limit)
+        }
+    }
+
+    return res.status(200)
+    .json(
+        new ApiResponse(200 , data , "All Doctors list fetched successfully")
+    )
+
+
+
+
 })
 
 
